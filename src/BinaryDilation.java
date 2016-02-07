@@ -1,5 +1,6 @@
 import  org.opencv.imgproc.Imgproc;
 
+
 import org.opencv.utils.Converters;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -18,6 +19,7 @@ import org.opencv.highgui.Highgui;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +31,7 @@ import java.util.Vector;
 import javax.imageio.ImageIO;
 
 import java.awt.image.BufferedImage;
-
+import java.nio.ByteBuffer;
 public class BinaryDilation {
 Mat BINARYMAT;
 public BufferedImage dilate(BufferedImage b)throws IOException{
@@ -65,6 +67,36 @@ Mat GREENMAT=mat.clone();
        // ArrayList holding all your coordinates is here...
         ArrayList<String> coordinatesBoundingBox=new ArrayList<>();
         //ArrayList holding all your coordinates is here...
+
+
+        
+        
+        
+/*
+        for(int y = 0; y < image.height(); y++) {
+            for(int x = 0; x < image.width(); x++) {
+                int index = y * image.widthStep() + x * image.nChannels();
+
+                // Used to read the pixel value - the 0xFF is needed to cast from
+                // an unsigned byte to an int.
+                int value = buffer.get(index) & 0xFF;
+
+                // Sets the pixel to a value (greyscale).
+                buffer.put(index, value);
+
+                // Sets the pixel to a value (RGB, stored in BGR order).
+                buffer.put(index, blue);
+                buffer.put(index + 1, green);
+                buffer.put(index + 2, red);
+            }
+        }
+
+        */
+        
+        
+        
+        
+        
         final List<MatOfPoint> contours2=new ArrayList<>();
         final Mat hierarchy2=new Mat();
         Imgproc.findContours(BINARYMAT, contours2, hierarchy2, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -80,7 +112,42 @@ Mat GREENMAT=mat.clone();
             System.out.println(coordinatesBoundingBox.get(k));
             Core.rectangle(BINARYMAT, new Point(boundingRect.x,boundingRect.y), new Point(boundingRect.x+boundingRect.width,boundingRect.y+boundingRect.height), new Scalar (255, 0, 0, 255),3); 
         }
-   
+        byte[] key = "BE698".getBytes();
+    	byte[] iv = new byte[64];
+    	new Random().nextBytes(iv);
+    	Encryption enc = new Encryption(key, iv);
+    	ArrayList<byte[]> encryptedSubImages = new ArrayList<byte[]>();
+    	
+    	//encrypt
+    	for(String s: coordinatesBoundingBox){
+        	String[] coords = s.split(",");
+        	BufferedImage subImg = mainController.inputSourceImage.getSubimage(Integer.parseInt(coords[0]), Integer.parseInt(coords[1]), Integer.parseInt(coords[2]), Integer.parseInt(coords[3])); 
+        	byte[] pixels = ((DataBufferByte) subImg.getRaster().getDataBuffer()).getData();
+        	byte[] encPix = enc.encrypt(pixels);
+        	//Draw onto image
+        	//
+        	encryptedSubImages.add(encPix);
+        }
+    	
+    	//decrypt
+    	int counter = 0;
+    	for(String s: coordinatesBoundingBox){
+    		String[] coords = s.split(",");
+    		byte[] currSubIm = encryptedSubImages.get(counter);
+    		currSubIm = enc.decrypt(currSubIm);
+    		BufferedImage img=new BufferedImage(Integer.parseInt(coords[2]), Integer.parseInt(coords[3]), BufferedImage.TYPE_3BYTE_BGR);
+    		img.setData(Raster.createRaster(img.getSampleModel(), new DataBufferByte(currSubIm, currSubIm.length), new java.awt.Point() ) );
+
+    		//draw onto image
+    		//
+    		counter++;
+    	}
+        
+        
+        
+        
+        
+        
         MatOfByte BYTEMAT=new MatOfByte();
         Highgui.imencode(".PNG", BINARYMAT, BYTEMAT);
         byte[] BYTESARRAY=BYTEMAT.toArray();
