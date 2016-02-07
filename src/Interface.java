@@ -1,10 +1,17 @@
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.ShortBufferException;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import java.awt.FileDialog;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -19,10 +26,17 @@ public class Interface extends Component{
 	int returnVal;
 	int repetition;
 	File file;
+	mainController mC=new mainController();
+
 	JLabel encryptImageLabel;
 	 JLabel decryptImageLabel;
 	 JPanel panel1;
-	 JPanel panel2;
+	 static JPanel panel2;
+	 String outputPath;
+	 static BufferedImage inputImage;
+	 BufferedImage inputImage2;
+
+	 
 	public void show(){
 		 log = new JTextArea(5,20);
 	        log.setMargin(new Insets(5,5,5,5));
@@ -31,7 +45,7 @@ public class Interface extends Component{
 		JFrame f1=new JFrame("Home");
 		f1.setSize(1000,850);
 		f1.getContentPane().setBackground(new Color(153,255,204));
-		
+	
 		
 		JTabbedPane options=new JTabbedPane();
 		options.setSize(200, 100);
@@ -105,8 +119,52 @@ public class Interface extends Component{
 	     encryptButton.setLocation(430,350);
 	     decryptButton.setLocation(430,410);
 	     
+	     encryptButton.addActionListener(new ActionListener(){public void actionPerformed(ActionEvent e){
+	    	if(e.getSource()==encryptButton){
+	    		
+	    		
+	    	 
+			try {
+				outputPath = mC.writeOutputFile(mC.executeBinaryDilation(mC.invertImage(ImageIO.read(file))));
+				 inputImage2=ImageIO.read(file);
+				
+				mC.binaryDilation1.doEncryption();
+				
+				
+				
+				
+	    	    encryptImageLabel=new JLabel(new ImageIcon(inputImage));
+	    	  
+      	    	 
+     	    	  //encryptImageLabel.setSize(350,500);
+     	    	  //encryptImageLabel.setLocation(550,250);
+     	    	   panel1.add(encryptImageLabel);
+     	    	  encryptImageLabel.setVisible(true);
+     	    	  System.out.println("yo");
+	    		}catch(IOException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | ShortBufferException | BadPaddingException | ClassNotFoundException io){
+	    			
+	    		
+	    	
+	    		}}}});
 	     encryptButton.setSize(85,50);
 	     decryptButton.setSize(85,50);
+	     
+	     decryptButton.addActionListener(new ActionListener(){public void actionPerformed(ActionEvent e){
+	    	 if(e.getSource()==decryptButton){
+	    		
+	    		
+	    			
+	    			 decryptImageLabel=new JLabel(new ImageIcon(inputImage2));
+	      	    	 
+	     	    	  //encryptImageLabel.setSize(350,500);
+	     	    	  //encryptImageLabel.setLocation(550,250);
+	     	    	   panel2.add(decryptImageLabel);
+	     	    	  decryptImageLabel.setVisible(true);
+					//mC.binaryDilation1.doDecrypt();
+			
+	    		 
+	    	 }
+	     }});
 	     
 	     encryptPanel.add(encryptButton);
 	     encryptPanel.add(decryptButton);
@@ -128,14 +186,21 @@ public class Interface extends Component{
 		            	 
 		                 file = fileChooser.getSelectedFile();
 		                 //This is where a real application would save the file.
-		                 if(repetition==1){
-		       	    	  encryptImageLabel=new JLabel(new ImageIcon(file.getAbsolutePath()));
+		                
+		       	    	 try {
+							inputImage=ImageIO.read(file);
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+		       	    	 
+		                	 encryptImageLabel=new JLabel(new ImageIcon(inputImage));
 		       	    	 
 		       	    	  //encryptImageLabel.setSize(350,500);
 		       	    	  //encryptImageLabel.setLocation(550,250);
 		       	    	   panel1.add(encryptImageLabel);
 		       	    	  encryptImageLabel.setVisible(true);
-		       	    	 
+		       	    	 /*
 		       	     }else if(repetition==2){
 		       	    	 decryptImageLabel=new JLabel(new ImageIcon(file.getAbsolutePath()));
 		       	    	 System.out.println(file.getAbsolutePath());
@@ -145,6 +210,7 @@ public class Interface extends Component{
 		       	         decryptImageLabel.setVisible(true);
 		       	    	
 		       	     }
+		       	     */
 		       	     
 		                 log.append("Saving: " + file.getName() + "." );
 		             } else {
@@ -158,7 +224,8 @@ public class Interface extends Component{
 	            
 	             
 	         
-	         } 
+	     
+	     }
 	         
 	 	);
 	     

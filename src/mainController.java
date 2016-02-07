@@ -3,6 +3,12 @@ import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.image.*;
 import java.io.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.ShortBufferException;
 import javax.imageio.*;
 import javax.swing.*;
 
@@ -44,12 +50,13 @@ BufferedImage bi = op.filter(invertedImage, null);
 return bi;
    
     }
-    public void writeOutputFile(BufferedImage bi) throws IOException{
+    public String writeOutputFile(BufferedImage bi) throws IOException{
     File outputFile=new File("/Users/tanasn/Desktop/bookPage2result.png");
     ImageIO.write(bi, "PNG", outputFile);
+    return outputFile.getAbsolutePath();
    
     }
-    public BufferedImage executeBinaryDilation(BufferedImage b) throws IOException{
+    public BufferedImage executeBinaryDilation(BufferedImage b) throws IOException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, ShortBufferException, BadPaddingException, ClassNotFoundException{
     BufferedImage BINARYDILATEDIMAGE=binaryDilation1.dilate(b);
    
    
@@ -66,7 +73,7 @@ JFrame2.add(new JLabel(new ImageIcon(OUTPUTSOURCEIMAGE)));
 JFrame2.setVisible(true);
    
     }
-    public static void main(String args[])throws IOException{
+    public static void main(String args[])throws IOException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, ShortBufferException, BadPaddingException, ClassNotFoundException{
     mainController mainControllerObject=new mainController();
     mainControllerObject.readInputImage();
     mainControllerObject.writeOutputFile(mainControllerObject.executeBinaryDilation(mainControllerObject.invertImage(inputSourceImage)));
